@@ -118,7 +118,7 @@ class ComputeAPI(API):
 
     def servers(self, **filters):
         try:
-            response = self.query().servers.get(**filters)
+OB            response = self.query().servers.get(**filters)
 
         except slumber.exceptions.HttpClientError as exc:
             raise
