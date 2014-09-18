@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import logging
+
 import slumber
 
 from . import API
@@ -122,6 +124,7 @@ class ComputeAPI(API):
             if e.response.status_code in (429, 502):
                 create_server()
             else:
+                logging.error(e.response.text)
                 raise e
 
     def images(self, **filters):
