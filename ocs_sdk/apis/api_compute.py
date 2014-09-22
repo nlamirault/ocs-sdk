@@ -36,6 +36,8 @@ class ComputeAPIItemUUID(ComputeAPIItem):
             '{}s'.format(self.kind)
         )(self.data['id'])
 
+    def delete(self):
+        return self.query().delete()
 
 class ImageItem(ComputeAPIItemUUID):
 
@@ -45,6 +47,7 @@ class ImageItem(ComputeAPIItemUUID):
     extra_volumes = None
     arch = None
     root_volume = None
+
 
 
 class SnapshotItem(ComputeAPIItemUUID):
@@ -99,7 +102,17 @@ class ServerItem(ComputeAPIItemUUID):
                 return self.poweron()
 
 
+class IpItem(ComputeAPIItemUUID):
+
+    kind = 'ip'
+
+    address = None
+    server = None
+
+
 class ComputeAPI(API):
+    """ Interacts with OCS Compute API.
+    """
 
     base_url = 'https://api.cloud.online.net'
 
@@ -117,7 +130,7 @@ class ComputeAPI(API):
 
     def create_server(self, **attributes):
         try:
-            return self.query().servers.post(**attributes).get('server', {})
+            return self.query().servers.post(data=attributes).get('server', {})
 
         except (slumber.exceptions.HttpServerError,
                slumber.exceptions.HttpClientError) as e:
@@ -139,6 +152,18 @@ class ComputeAPI(API):
             for image in response.get('images', [])
         ]
 
+    def create_image(self, **attributes):
+        try:
+            return self.query().images.post(data=attributes).get('image', {})
+
+        except (slumber.exceptions.HttpServerError,
+               slumber.exceptions.HttpClientError) as e:
+            if e.response.status_code in (429, 502):
+                create_image()
+            else:
+                logging.error(e.response.text)
+                raise e
+
     def volumes(self, **filters):
         try:
             response = self.query().volumes.get(**filters)
@@ -151,6 +176,18 @@ class ComputeAPI(API):
             for volume in response.get('volumes', [])
         ]
 
+    def create_volume(self, **attributes):
+        try:
+            return self.query().volumes.post(data=attributes).get('volume', {})
+
+        except (slumber.exceptions.HttpServerError,
+               slumber.exceptions.HttpClientError) as e:
+            if e.response.status_code in (429, 502):
+                create_volume()
+            else:
+                logging.error(e.response.text)
+                raise e
+
     def snapshots(self, **filters):
         try:
             response = self.query().snapshots.get(**filters)
@@ -162,3 +199,41 @@ class ComputeAPI(API):
             SnapshotItem(self, snapshot)
             for snapshot in response.get('snapshots', [])
         ]
+
+    def create_snapshot(self, **attributes):
+        try:
+            return self.query().snapshots.post(data=attributes).get('snapshot', {})
+
+        except (slumber.exceptions.HttpServerError,
+               slumber.exceptions.HttpClientError) as e:
+            if e.response.status_code in (429, 502):
+                create_snapshot()
+            else:
+                logging.error(e.response.text)
+                raise e
+
+    def ips(self, **filters):
+        try:
+            response = self.query().ips.get(**filters)
+
+        except slumber.exceptions.HttpClientError as exc:
+            raise
+
+        return [
+            IpItem(self, ip)
+            for ip in response.get('ips', [])
+        ]
+
+    def create_ip(self, **attributes):
+        try:
+            return self.query().ips.post(data=attributes).get('ip', {})
+
+        except (slumber.exceptions.HttpServerError,
+               slumber.exceptions.HttpClientError) as e:
+            if e.response.status_code in (429, 502):
+                create_ip()
+            else:
+                logging.error(e.response.text)
+                print e
+                raise e
+
