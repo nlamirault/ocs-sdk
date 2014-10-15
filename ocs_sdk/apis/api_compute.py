@@ -39,6 +39,7 @@ class ComputeAPIItemUUID(ComputeAPIItem):
     def delete(self):
         return self.query().delete()
 
+
 class ImageItem(ComputeAPIItemUUID):
 
     kind = 'image'
@@ -47,7 +48,6 @@ class ImageItem(ComputeAPIItemUUID):
     extra_volumes = None
     arch = None
     root_volume = None
-
 
 
 class SnapshotItem(ComputeAPIItemUUID):
@@ -133,7 +133,7 @@ class ComputeAPI(API):
             return self.query().servers.post(data=attributes).get('server', {})
 
         except (slumber.exceptions.HttpServerError,
-               slumber.exceptions.HttpClientError) as e:
+                slumber.exceptions.HttpClientError) as e:
             if e.response.status_code in (429, 502):
                 create_server()
             else:
@@ -157,7 +157,7 @@ class ComputeAPI(API):
             return self.query().images.post(data=attributes).get('image', {})
 
         except (slumber.exceptions.HttpServerError,
-               slumber.exceptions.HttpClientError) as e:
+                slumber.exceptions.HttpClientError) as e:
             if e.response.status_code in (429, 502):
                 create_image()
             else:
@@ -181,7 +181,7 @@ class ComputeAPI(API):
             return self.query().volumes.post(data=attributes).get('volume', {})
 
         except (slumber.exceptions.HttpServerError,
-               slumber.exceptions.HttpClientError) as e:
+                slumber.exceptions.HttpClientError) as e:
             if e.response.status_code in (429, 502):
                 create_volume()
             else:
@@ -202,10 +202,11 @@ class ComputeAPI(API):
 
     def create_snapshot(self, **attributes):
         try:
-            return self.query().snapshots.post(data=attributes).get('snapshot', {})
+            return self.query().snapshots.post(data=attributes) \
+                                         .get('snapshot', {})
 
         except (slumber.exceptions.HttpServerError,
-               slumber.exceptions.HttpClientError) as e:
+                slumber.exceptions.HttpClientError) as e:
             if e.response.status_code in (429, 502):
                 create_snapshot()
             else:
@@ -229,11 +230,10 @@ class ComputeAPI(API):
             return self.query().ips.post(data=attributes).get('ip', {})
 
         except (slumber.exceptions.HttpServerError,
-               slumber.exceptions.HttpClientError) as e:
+                slumber.exceptions.HttpClientError) as e:
             if e.response.status_code in (429, 502):
                 create_ip()
             else:
                 logging.error(e.response.text)
                 print e
                 raise e
-
